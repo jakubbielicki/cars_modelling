@@ -7,8 +7,22 @@ from .DataProcessor import DataProcessor
 class BlobDataDownloader(DataProcessor):
     def __init__(self, params):
         super().__init__(params)
-        self.target_path = self.root_path / Path(r"1_Raw_from_blob")
+        self._input_path = None
+        self._target_path = self.root_path / Path(r"1_Raw_from_blob")
+        self._step = "DOWNLOAD DATA"
         self.connection_string = os.environ['TheConnectionString']
+
+    @property
+    def input_path(self):
+        return self._input_path
+    
+    @property
+    def target_path(self):
+        return self._target_path
+    
+    @property
+    def step(self):
+        return self._step
 
     def download_data(self):
 
@@ -32,9 +46,9 @@ class BlobDataDownloader(DataProcessor):
                 count =+ 1
 
         if count: 
-            logging.info("All files successfuly downloaded")
+            logging.info(f"Step {self.step}: All files successfuly downloaded")
         else:
-            logging.info('All files already in target directory.')
+            logging.info(f"Step {self.step}: All files already in target directory.")
 
-    def iterate_items(self, items: list):
+    def _iterate_items(self, items: list):
         pass

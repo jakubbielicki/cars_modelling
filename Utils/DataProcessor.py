@@ -13,16 +13,27 @@ class DataProcessor(ABC):
 
         root_path = params.get('root_path', 'C:\Cars_processing')
         self.root_path = Path(root_path)
-        
-        #self.input_path = Path
-        #self.output_path = Path
 
-    def process_files(self) -> dict:
+    @property
+    @abstractmethod
+    def input_path(self):
+        pass
+
+    @property
+    @abstractmethod
+    def target_path(self):
+        pass
+
+    @property
+    @abstractmethod
+    def step(self):
+        pass
+
+    def process_files(self) -> (str, list):
 
         self.__make_dirs()
         input_files_in_dir = os.listdir(self.input_path)
         output_files_in_dir = os.listdir(self.target_path)
-        files_contents = {}
         counter = 0
         for file_name in input_files_in_dir:
             if file_name not in output_files_in_dir:
@@ -30,20 +41,19 @@ class DataProcessor(ABC):
                 input_file = open(input_file_path, 'r')
                 html_list = json.load(input_file)
 
-                processed_list = self.iterate_items(html_list, file_name)
-                files_contents[file_name] = processed_list
+                processed_list = self._iterate_items(html_list, file_name)
+                yield file_name, processed_list
 
-                counter =+ 1
+                counter += 1
 
         if counter:
-            logging.info("All files processed.")
+            logging.info(f"Step {self.step}: All files processed.")
         else:
-            logging.info("There were no files to process.")
+            logging.info(f"Step {self.step}: There were no files to process.")
 
-        return files_contents
 
     @abstractmethod
-    def iterate_items(self, items: list, file_name: str):
+    def _iterate_items(self, items: list, file_name: str):
         pass
 
     def __make_dirs(self):

@@ -7,31 +7,40 @@ from pathlib import Path
 class CSVDataStructurizer(DataProcessor):
     def __init__(self, params):
         super().__init__(params)
-        self.input_path = self.root_path / Path("2_Webscrapped_data")
-        self.target_path = self.root_path / Path("3_Scructured_data")
+        self._input_path = self.root_path / Path("2_Webscrapped_data")
+        self._target_path = self.root_path / Path("3_Scructured_data")
+        self._step = 'STRUCTURE DATA'
         self.column_mappings = params.get('column_mappings', {})
+
+    @property
+    def input_path(self):
+        return self._input_path
+    
+    @property
+    def target_path(self):
+        return self._target_path
+    
+    @property
+    def step(self):
+        return self._step
 
     def structure_data(self):
 
         output_file_path = self.target_path / Path("structured.csv")
-        files_contents = self.process_files()
         headers = self.__get_headers()
         with open(output_file_path, mode='w', newline='', encoding='utf-8') as file:
             csv_writer = csv.DictWriter(file, delimiter=';', fieldnames=headers)
             csv_writer.writeheader()
 
-            for file_content in files_contents.values():
-                count = 0
-                for row in file_content:
-                    csv_writer.writerow(row)
-                    count += 1
-                    print(count)
+            for _, cars_list in self.process_files():
+                for car_row in cars_list:
+                    csv_writer.writerow(car_row)
 
-    def iterate_items(self, items: list, file_name: str):
+    def _iterate_items(self, items: list, file_name: str):
 
         cars_to_save = []
-        for item in items:
-            structured_record = self.__structure_record(item, file_name)
+        for car_info in items:
+            structured_record = self.__structure_record(car_info, file_name)
             cars_to_save.append(structured_record)
 
         return cars_to_save

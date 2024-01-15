@@ -7,26 +7,48 @@ from bs4 import BeautifulSoup
 class HTMLDataScraper(DataProcessor):
     def __init__(self, params):
         super().__init__(params)
-        self.input_path = self.root_path / Path(r"1_Raw_from_blob")
-        self.target_path = self.root_path / Path(r"2_Webscrapped_data")
+        self._input_path = self.root_path / Path(r"1_Raw_from_blob")
+        self._target_path = self.root_path / Path(r"2_Webscrapped_data")
+        self._step = 'SCRAP DATA'
+
+    @property
+    def input_path(self):
+        return self._input_path
+    
+    @property
+    def target_path(self):
+        return self._target_path
+    
+    @property
+    def step(self):
+        return self._step
 
     def scrape_data(self):
 
-        files_contents = self.process_files()
-        for file_name, file_contents in files_contents.items():
+        for file_name, file_contents in self.process_files():
             output_file_path = self.target_path / Path(file_name)
             with open(output_file_path, 'w') as file:
                 json.dump(file_contents, file)
 
-    def iterate_items(self, items: list, file_name: str):
+            logging.info(f"Webscrapped file {file_name} saved.")
+
+    def _iterate_items(self, items: list, file_name: str):
         cars_prepared = []
         time_processed = file_name.replace('.json','')
-        for car_html in items:
-            scrapped_car_data = self.__scrape_page(car_html)
-            car_model = scrapped_car_data['details']['Model pojazdu']
-            seller = scrapped_car_data['seller']
-            logging.info(f"Data from file {time_processed}, car {car_model}, from seller {seller} scrapped.")
-            cars_prepared.append(scrapped_car_data)
+        unable_to_scrap = 0
+        for i, car_html in enumerate(items):
+            try:
+                scrapped_car_data = self.__scrape_page(car_html)
+            except:
+                logging.debug(f"Unable to scrap data from file {file_name}, index {i}")
+                unable_to_scrap += 1
+            else:
+                car_model = scrapped_car_data['details']['Model pojazdu']
+                seller = scrapped_car_data['seller']
+                logging.debug(f"Data from file {time_processed}, car {car_model}, from seller {seller} scrapped.")
+                cars_prepared.append(scrapped_car_data)
+
+        logging.info(f"Cars from file {file_name} processed. Number of HTML file scrappings failed: {unable_to_scrap}")
 
         return cars_prepared
     
