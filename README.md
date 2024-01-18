@@ -12,6 +12,7 @@ which is done outside this project. Then, code in this project is responsible fo
 Before running the pipeline the following needs to be done:
 - Azure Blob Storage connection string should be saved as environment variable "TheConnectionString"
 - config.yaml file parameters should be set (note, that root_path and logging_level don't need to be set)
+- all required packages from requirements.txt should be installed in new python venv
 
 The pipeline can be executed by running Entry_point.py file.
 
