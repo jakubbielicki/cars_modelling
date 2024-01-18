@@ -9,6 +9,7 @@ class CSVDataStructurizer(DataProcessor):
         super().__init__(params)
         self._input_path = self.root_path / Path("2_Webscrapped_data")
         self._target_path = self.root_path / Path("3_Scructured_data")
+        self._traget_file_path = self._target_path / Path("structured.csv")
         self._step = 'STRUCTURE DATA'
         self.column_mappings = params.get('column_mappings', {})
 
@@ -26,9 +27,8 @@ class CSVDataStructurizer(DataProcessor):
 
     def structure_data(self):
 
-        output_file_path = self.target_path / Path("structured.csv")
         headers = self.__get_headers()
-        with open(output_file_path, mode='w', newline='', encoding='utf-8') as file:
+        with open(self._traget_file_path, mode='w', newline='', encoding='utf-8') as file:
             csv_writer = csv.DictWriter(file, delimiter=';', fieldnames=headers)
             csv_writer.writeheader()
 
